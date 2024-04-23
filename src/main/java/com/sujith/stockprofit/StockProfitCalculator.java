@@ -17,9 +17,9 @@ public class StockProfitCalculator {
 
     CSVReader reader = null;
     try {
-      reader = new CSVReaderBuilder(new FileReader("C:\\stocks\\" + stockName + ".CSV"))
-          .withSkipLines(1) // TO Skip Header
-          .build();
+      reader = new CSVReaderBuilder(new FileReader("/Users/admin/Downloads/Java - StockPrice 2/"+ stockName + ".CSV"))
+              .withSkipLines(1) // TO Skip Header
+              .build();
 
     } catch (FileNotFoundException e) {
       System.out.println("System error file not found for given stock: " + stockName);
@@ -32,10 +32,19 @@ public class StockProfitCalculator {
     } catch (IOException | CsvException e) {
       System.out.println("System error while reading file: " + stockName);
       return new StockInfo();
+    } finally { // closing the reader in the finally block
+      if (reader != null) {
+        try {
+          reader.close();
+        } catch (IOException e) {
+          System.out.println("Error while closing the CSV reader: " + e.getMessage());
+        }
+      }
     }
     return getBestTransaction(year, allData);
 
   }
+
 
   static StockInfo getBestTransaction(int year, List<String[]> allData) {
     StockInfo bestTransaction = new StockInfo(null, 0, null, 0, 0);
@@ -54,14 +63,10 @@ public class StockProfitCalculator {
       double highPrice = Double.parseDouble(data[2]);
 
       if (currentYear == year) {
-        if (buyPrice == 0) {
+        if ((buyPrice == 0)||(buyPrice > lowPrice)) {
           buyPrice = lowPrice;
           buyDate = LocalDate.parse(date, formatter);
 
-        }
-        if (buyPrice > lowPrice) {
-          buyPrice = lowPrice;
-          buyDate = LocalDate.parse(date, formatter);
         }
         if (sellPrice == 0) {
           sellPrice = highPrice;
